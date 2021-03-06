@@ -1,13 +1,11 @@
 version: "3.9"
 services:
   node:
-    build: .
+    build: . # Build dockerfile at root
     ports:
       - "9000:3000"
     volumes:
       - ./app:/usr/src/app
     working_dir: /usr/src/app
-    stdin_open: true
-    tty: true
     entrypoint: ["npm"]
-    command: ["run", "start"]
+    command: ["run", "dev"]
