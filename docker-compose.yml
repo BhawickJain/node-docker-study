@@ -3,9 +3,10 @@ services:
   node:
     build: . # Build dockerfile at root
     ports:
-      - "9000:3000"
+      - "8081:3000"
     volumes:
       - ./app:/usr/src/app
+      - /usr/src/app/node_modules
     working_dir: /usr/src/app
     entrypoint: ["npm"]
     command: ["run", "dev"]

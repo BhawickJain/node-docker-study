@@ -1,7 +1,7 @@
 {
-  "name": "node-mosh",
+  "name": "node-dockerize",
   "version": "1.0.0",
-  "description": "basic walkthrough of node with mosh",
+  "description": "node with docker app from Node Documentation",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,5 +11,9 @@
   "author": "Bhawick",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
   }
 }
