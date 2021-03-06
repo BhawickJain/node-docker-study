@@ -27,6 +27,10 @@ Other things I learned:
 `[x]` Under certain conditions, `docker-compose up` can hang when stating `attaching to` node.  
 This is because of an issue with docker and macOS, combined with the use of a port that is in use. I was using port 8080 which in later runs was busy. It is best to check if the port you want to use is free and if `docker-compose up` is hanging, ensure all caches are cleared, images are removed, redundant files are deleted and docker is restarted. Last resort maybe a restart of the laptop is the `fseventd` is rampant. Initial suspicion that deleting the `node_modules` folder was responsible was incorrect. In the current up commands, no issues have been and tried against various local and container port bindings.
 
+`[ ]` Docker-compose fails to connect and says port is already used.  
+This is has been replicated when you manually prune the network objects in docker. [Github Issue #5745](https://github.com/docker/compose/issues/5745) shows that you shouldn't be messing with networks managed by Docker-Compose. Since this happens earlier with port `8080`, now `8081` and `9000` I wonder if an OS restart will free up the unallocated ports? It seems to be some miscommunication between docker and macOS.`
+`[ ]` Try restarting your laptop and trying the denied ports.  
+
 ## How to run
 
 Given you inside the root folder, run `docker-compose up —build`
