@@ -1,0 +1,15 @@
+{
+  "name": "node-mosh",
+  "version": "1.0.0",
+  "description": "basic walkthrough of node with mosh",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "echo hello"
+  },
+  "author": "Bhawick",
+  "license": "ISC",
+  "dependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
