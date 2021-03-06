@@ -29,3 +29,6 @@ Ensure gRPC FUSE is turned off as it does not fly with raw fs updates which Node
 Additional questions:  
 `[?]` Jupyter Notebook instances run well when gRPC FUSE is turned on. Changes made within the web-app environment are smooth. Would this hold for when gRPC FUSE is closed?  
 `[?]` Running `npm install` with a package.json with Nodemon as a dependency still leads to Nodemon not being available when running the command afterwards. I have confirmed that Nodemon dependency is available just before calling nodemon. Only when I have a separate `npm install -g nodemon` present in the Dockerfile makes it available. In addition nodemon is not a production package and should be installed as a devDependency. It is also not clear is other packages installed via `package.json` will suffer the same issue, indicating an issue in my process.  
+
+Additional Tasks:
+`[ ]` Nodemon can also be used to watch and hot reload other programs like those written in python. [See running non-node scripts](https://www.npmjs.com/package/nodemon).  
