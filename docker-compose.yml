@@ -6,7 +6,7 @@ services:
       - "8080:3000"
     volumes:
       - ./app:/usr/src/app
-      - /usr/src/app/node_modules
+      ## - /usr/src/app/node_modules ## separate mount not created to demo issue.
     working_dir: /usr/src/app
     entrypoint: ["npm"]
     command: ["run", "dev"]
