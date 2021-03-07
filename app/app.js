@@ -1,20 +1,22 @@
-"use strict";
+// Example of a function body
+const sayHello = (name) => {
+  return "Hello " + name;
+};
 
-const express = require("express");
+// a global object
+console.log(sayHello("Bhawick"));
 
-// Constants
-const PORT = 3000;
-const HOST = "0.0.0.0";
+global.console.log(
+  "Console.Log method belongs to the global object which is a globally available within Node.js"
+);
 
-// App
-const app = express();
-app.get("/", (req, res) => {
-  res.send("Hello Hello");
-});
+let name_var = "Bhawick";
 
-app.get("/*", (req, res) => {
-  res.send("Hello " + req.url.substr(1, req.url.length - 1) + "!");
-});
+// declared functions and variables are scoped to app.js
+console.log(
+  "Variables and Function I define here are not added to the global object hence `name` = " +
+    global.name_var
+);
 
-app.listen(PORT, HOST);
-console.log(`Running on http://${HOST}:${PORT}`);
+// information about the app.js module
+console.log(module);
