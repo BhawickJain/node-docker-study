@@ -1,6 +1,6 @@
 ---
 title: Node.JS Development with Docker
-date: 06/03/2021 
+date: 07/03/2021 
 author:
  - Bhawick Jain
 or: 20210306150356
@@ -27,21 +27,24 @@ Other things I learned:
 `[x]` Under certain conditions, `docker-compose up` can hang when stating `attaching to` node.  
 This is because of an issue with docker and macOS, combined with the use of a port that is in use. I was using port 8080 which in later runs was busy. It is best to check if the port you want to use is free and if `docker-compose up` is hanging, ensure all caches are cleared, images are removed, redundant files are deleted and docker is restarted. Last resort maybe a restart of the laptop is the `fseventd` is rampant. Initial suspicion that deleting the `node_modules` folder was responsible was incorrect. In the current up commands, no issues have been and tried against various local and container port bindings.
 
-`[ ]` Docker-compose fails to connect and says port is already used.  
-This is has been replicated when you manually prune the network objects in docker. [Github Issue #5745](https://github.com/docker/compose/issues/5745) shows that you shouldn't be messing with networks managed by Docker-Compose. Since this happens earlier with port `8080`, now `8081` and `9000` I wonder if an OS restart will free up the unallocated ports? It seems to be some miscommunication between docker and macOS.`
-`[ ]` Try restarting your laptop and trying the denied ports.  
+`[x]` Docker-compose fails to connect and says port is already used.  
+This is has been replicated when you manually prune the network objects in docker. [Github Issue #5745](https://github.com/docker/compose/issues/5745) shows that you shouldn't be messing with networks managed by Docker-Compose. Since this happens earlier with port `8080`, now `8081` and `9000` I wonder if an OS restart will free up the unallocated ports? It seems to be some miscommunication between docker and macOS.
+`[-]` Try restarting your laptop and trying the denied ports.  
+No longer required. After a good night's sleep with Docker shut-off, it appears the ports `8080` and `8081` are unallocated again. Either there is a timeout in the OS that marks them as unallocated with Docker is turned or there was other magic going on. Certainly those ports did not work earlier. I know the network utility did not show any allocation to those ports so perhaps it was the OS doing garbage collection after Docker was closed after some period. I did leave the machine running all night. 
 
 ## How to run
 
-Given you inside the root folder, run `docker-compose up —build`
+Given you're inside the root folder, run `docker-compose up —build`
 Ensure gRPC FUSE is turned off as it does not fly with raw fs updates which Nodemon relies on.
 
 Additional questions:  
 `[?]` Jupyter Notebook instances run well when gRPC FUSE is turned on. Changes made within the web-app environment are smooth. Would this hold for when gRPC FUSE is closed?  
 
-`[?]` Running `npm install` with a package.json with Nodemon as a dependency still leads to Nodemon not being available when running the command afterwards. I have confirmed that Nodemon dependency is available just before calling nodemon. Only when I have a separate `npm install -g nodemon` present in the Dockerfile makes it available. In addition nodemon is not a production package and should be installed as a devDependency. It is also not clear is other packages installed via `package.json` will suffer the same issue, indicating an issue in my process.  
+`[x]` Running `npm install` with a package.json with Nodemon as a dependency still leads to Nodemon not being available when running the command afterwards. I have confirmed that Nodemon dependency is available just before calling nodemon. Only when I have a separate `npm install -g nodemon` present in the Dockerfile makes it available. In addition nodemon is not a production package and should be installed as a devDependency. It is also not clear is other packages installed via `package.json` will suffer the same issue, indicating an issue in my process.  
 
-This is because I was installing my packages while building my docker image which involves created a node_modules folder within my `./usr/src/app` directory. But when I mounted the same folder (which didn't have the `node_modues` installed) back in as `./app:/usr/src/app` it would erease the packages. This meant Nodemon was not availabel along with any other packages required for the project to run. The solution is to mount the container's `node_modules` path as seen in the `docker-compose.yml` _without a host binding_ which would prevent the app folder overlay to hide that folder.  
+This is because I was installing my packages while building my docker image which involves created a node_modules folder within my `./usr/src/app` directory. But when I mounted the same folder in the docker-compose file (which didn't have the `node_modues` installed) back in as `./app:/usr/src/app` it would _overlay_ on top of the packages, leading them to be inaccessible at run-time. This meant Nodemon was not available along with any other packages required for the project to run. The solution is to mount the container's `node_modules` path as seen in the `docker-compose.yml` _without a host binding_ which would prevent the app folder overlay to hide that folder.  
+
+As an example I will create a branch `node_modules-not-mounted` to demo is problem if you want to take a look later.
 
 Another interesting point is that the `node_modules` folder in the container has the packages popuated whilst the `node_modules` folder on the host has none. Which shows that there no binding but some aspects of the file systems requires an equivalent folder to remain. Of course this can be deleted after the process is shutdown without any side-effects later. I have included it has part of `.dockerignore` for good measure.  
 
