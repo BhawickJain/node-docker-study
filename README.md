@@ -21,7 +21,9 @@ You avoid using global scopes as names and functions scoped globally will be ove
 Modules are core to Node.js, each file is a module and you need to `export` them to make them available to other places.
 
 use jshint to catch issues in your code. You need to install jshint globally as bash doesn't seem to find any of the projects installed by npm during the image build.
-`[ ]` Installed JS Hint and tried it  
+`[x]` Installed JS Hint and tried it. It needs to be installed globally.  
+`[ ]` Find a way to change the path variables in the Linux Bash to look for `node_modules` installed within the project instead of the global directories. I have tried `export NODE_PATH=usr/src/app/node_modules` without any effect. In fact this variable is empty before this, so bash is unlikely to be informing itself with that variable.  
+
 
 Each module is wrapped in an immediately invoked function expressed (IFFY) which is basically a function but wrapped as `(/* function*/)()` enabling no assignment to a variable. It means you can invoke something immediately without reveal the variables inside the function. Examples function and arrow function:
 
