@@ -16,68 +16,21 @@ This demo app shows a simple user profile app set up using
 - nodejs backend with express module
 - mongodb for data storage
 
-`[ ]` Annotate every part of the code to explain the function of each.  
+`[x]` Annotate every part of the code to explain the function of each.  
+`[ ]` Add another attribute to the profile like Job or Places visited  
+`[x]` Even if the `my-db` and the `users` collection is present in MongoDB these are automatically created (for now) by the update-profile app.  
+`[ ]` Debug a network issues where MongoDb and MongoExpress could communicate under the Docker-Compose network but my-app could not. Problem was `server.js` MongoDb connect method could not access mongodb IP provided due to a bad variable.  
 
-All components are docker-based
-
-### With Docker
-
-#### To start the application
-
-Step 1: Create docker network
-
-    docker network create mongo-network 
-
-Step 2: start mongodb 
-
-    docker run -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=password --name mongodb --net mongo-network mongo    
-
-Step 3: start mongo-express
-    
-    docker run -d -p 8081:8081 -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin -e ME_CONFIG_MONGODB_ADMINPASSWORD=password --net mongo-network --name mongo-express -e ME_CONFIG_MONGODB_SERVER=mongodb mongo-express   
-
-_NOTE: creating docker-network in optional. You can start both containers in a default network. In this case, just emit `--net` flag in `docker run` command_
-
-Step 4: open mongo-express from browser
-
-    http://localhost:8081
-
-Step 5: create `user-account` _db_ and `users` _collection_ in mongo-express
-
-Step 6: Start your nodejs application locally - go to `app` directory of project 
-
-    npm install 
-    node server.js
-    
-Step 7: Access you nodejs application UI from browser
-
-    http://localhost:3000
+Generally I think this example is very terse and hard to read, the js scripts and css should be separated from the html page. The `server.js` should only be invoking Mongo Connect methods which then call specific Mongo functions, currently it very hard to understand what is happening. There are hard-coded values as well.
+`[ ]`  Refactor and organise code. Gives you a chance to understand it better.  
+`[ ]` Create `./functions/mongodb.js` file which has all the MongoDb APIs  
+`[ ]` Get more comfortable with HTML,CSS and JS manipulations.  
+`[ ]` Create a Development Container of this with Nodemon. Investigate docker-compose.dev  
 
 ### With Docker Compose
 
-#### To start the application
+`docker-compose up --build`  
+`docker-compose down --rmi all -v`
 
-Step 1: start mongodb and mongo-express
-
-    docker-compose -f docker-compose.yaml up
-    
-_You can access the mongo-express under localhost:8080 from your browser_
-    
-Step 2: in mongo-express UI - create a new database "my-db"
-
-Step 3: in mongo-express UI - create a new collection "users" in the database "my-db"       
-    
-Step 4: start node server 
-
-    npm install
-    node server.js
-    
-Step 5: access the nodejs application from browser 
-
-    http://localhost:3000
-
-#### To build a docker image from the application
-
-    docker build -t my-app:1.0 .       
-    
-The dot "." at the end of the command denotes location of the Dockerfile.
+to keep the database data but remove the images  
+`docker-compose down --rmi all`
