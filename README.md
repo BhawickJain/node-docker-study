@@ -1,54 +1,83 @@
 ---
 title: Node.JS Development with Docker
-date: 07/03/2021 
+date: 13/03/2021 
 author:
  - Bhawick Jain
-or: 20210306150356
-version: 0.1.0
+or: 20210313094159
 URL: github.com/BhawickJain/node-docker-study
 ---
 
-The aim is to gain a basic familiarisation of Node.js and how it can be developed within a Docker Container. The follow aims are met:  
-`[x]` Create a basic setup with Dockerfile and Docker-Compose  
-`[x]` Make use of Nodemon to hot reload changes.  
-`[x]` Create a rudimentary repo that captures the simplest setup necessary  
-`[x]` Understand how package.json `scripts` are used to create enterypoints  
+Aim is to setup a small application that uses node.js and a database to understand how to connect applications within a docker-compose network.
 
-`[x]` Make use of Dev-Dependencies  
-Dev Dependencies are installed by `npm install "[package-name]" -D"` and are installed by default when you `npm install`. You can omit dev dependencies by `npm install --production`.
+## demo app - developing with Docker
 
-The following challenges were met:  
-`[x]` Hot reloads took too long to update  
-`[x]` Nodemon does not restart within Docker Container  
+This demo app shows a simple user profile app set up using 
+- index.html with pure js and css styles
+- nodejs backend with express module
+- mongodb for data storage
 
-Other things I learned:  
-`[x]` alpine OS does not have bash so you need to open interactive tty via `/bin/bash`  
+`[ ]` Annotate every part of the code to explain the function of each.  
 
-`[x]` Under certain conditions, `docker-compose up` can hang when stating `attaching to` node.  
-This is because of an issue with docker and macOS, combined with the use of a port that is in use. I was using port 8080 which in later runs was busy. It is best to check if the port you want to use is free and if `docker-compose up` is hanging, ensure all caches are cleared, images are removed, redundant files are deleted and docker is restarted. Last resort maybe a restart of the laptop is the `fseventd` is rampant. Initial suspicion that deleting the `node_modules` folder was responsible was incorrect. In the current up commands, no issues have been and tried against various local and container port bindings.
+All components are docker-based
 
-`[x]` Docker-compose fails to connect and says port is already used.  
-This is has been replicated when you manually prune the network objects in docker. [Github Issue #5745](https://github.com/docker/compose/issues/5745) shows that you shouldn't be messing with networks managed by Docker-Compose. Since this happens earlier with port `8080`, now `8081` and `9000` I wonder if an OS restart will free up the unallocated ports? It seems to be some miscommunication between docker and macOS.
-`[-]` Try restarting your laptop and trying the denied ports.  
-No longer required. After a good night's sleep with Docker shut-off, it appears the ports `8080` and `8081` are unallocated again. Either there is a timeout in the OS that marks them as unallocated with Docker is turned or there was other magic going on. Certainly those ports did not work earlier. I know the network utility did not show any allocation to those ports so perhaps it was the OS doing garbage collection after Docker was closed after some period. I did leave the machine running all night. 
+### With Docker
 
-## How to run
+#### To start the application
 
-Given you're inside the root folder, run `docker-compose up —build`
-Ensure gRPC FUSE is turned off as it does not fly with raw fs updates which Nodemon relies on.
+Step 1: Create docker network
 
-Additional questions:  
-`[?]` Jupyter Notebook instances run well when gRPC FUSE is turned on. Changes made within the web-app environment are smooth. Would this hold for when gRPC FUSE is closed?  
+    docker network create mongo-network 
 
-`[x]` Running `npm install` with a package.json with Nodemon as a dependency still leads to Nodemon not being available when running the command afterwards. I have confirmed that Nodemon dependency is available just before calling nodemon. Only when I have a separate `npm install -g nodemon` present in the Dockerfile makes it available. In addition nodemon is not a production package and should be installed as a devDependency. It is also not clear is other packages installed via `package.json` will suffer the same issue, indicating an issue in my process.  
+Step 2: start mongodb 
 
-This is because I was installing my packages while building my docker image which involves created a node_modules folder within my `./usr/src/app` directory. But when I mounted the same folder in the docker-compose file (which didn't have the `node_modues` installed) back in as `./app:/usr/src/app` it would _overlay_ on top of the packages, leading them to be inaccessible at run-time. This meant Nodemon was not available along with any other packages required for the project to run. The solution is to mount the container's `node_modules` path as seen in the `docker-compose.yml` _without a host binding_ which would prevent the app folder overlay to hide that folder.  
+    docker run -d -p 27017:27017 -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=password --name mongodb --net mongo-network mongo    
 
-As an example I will create a branch `node_modules-not-mounted` to demo is problem if you want to take a look later.
+Step 3: start mongo-express
+    
+    docker run -d -p 8081:8081 -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin -e ME_CONFIG_MONGODB_ADMINPASSWORD=password --net mongo-network --name mongo-express -e ME_CONFIG_MONGODB_SERVER=mongodb mongo-express   
 
-Another interesting point is that the `node_modules` folder in the container has the packages popuated whilst the `node_modules` folder on the host has none. Which shows that there no binding but some aspects of the file systems requires an equivalent folder to remain. Of course this can be deleted after the process is shutdown without any side-effects later. I have included it has part of `.dockerignore` for good measure.  
+_NOTE: creating docker-network in optional. You can start both containers in a default network. In this case, just emit `--net` flag in `docker run` command_
 
-`[ ]` Explore any specific technical details that provide a better explanation. An excellent [Stackoverflow explananation](https://stackoverflow.com/questions/30043872/docker-compose-node-modules-not-present-in-a-volume-after-npm-install-succeeds) has been provided but refers to Docker's Standard Volumes documentation for any further referece.  
+Step 4: open mongo-express from browser
 
-Additional Tasks:
-`[ ]` Nodemon can also be used to watch and hot reload other programs like those written in python. [See running non-node scripts](https://www.npmjs.com/package/nodemon).  
+    http://localhost:8081
+
+Step 5: create `user-account` _db_ and `users` _collection_ in mongo-express
+
+Step 6: Start your nodejs application locally - go to `app` directory of project 
+
+    npm install 
+    node server.js
+    
+Step 7: Access you nodejs application UI from browser
+
+    http://localhost:3000
+
+### With Docker Compose
+
+#### To start the application
+
+Step 1: start mongodb and mongo-express
+
+    docker-compose -f docker-compose.yaml up
+    
+_You can access the mongo-express under localhost:8080 from your browser_
+    
+Step 2: in mongo-express UI - create a new database "my-db"
+
+Step 3: in mongo-express UI - create a new collection "users" in the database "my-db"       
+    
+Step 4: start node server 
+
+    npm install
+    node server.js
+    
+Step 5: access the nodejs application from browser 
+
+    http://localhost:3000
+
+#### To build a docker image from the application
+
+    docker build -t my-app:1.0 .       
+    
+The dot "." at the end of the command denotes location of the Dockerfile.
